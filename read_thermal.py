@@ -14,6 +14,11 @@ import pigpio
 from helpers import *
 from time import sleep
 import datetime
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(7, GPIO.OUT)
+
 
 i2c_bus = smbus.SMBus(1)
 OMRON_1 = 0x0a  # 7 bit I2C address of Omron MEMS Temp Sensor D6T-44L
@@ -31,10 +36,12 @@ previous_celsius_data = []
 
 def turn_light_on():
     print 'turning light on'
+    GPIO.output(7, True)
 
 
 def turn_light_off():
     print 'turning light off'
+    GPIO.output(7, False)
 
 
 def tick(i2c_bus, OMRON_1, data):
@@ -67,3 +74,4 @@ finally:
     print 'finally done'
     pi.i2c_close(handle)
     pi.stop()
+    GPIO.cleanup()
