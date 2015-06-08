@@ -71,7 +71,7 @@ def tick(i2c_bus, OMRON_1, data):
 
 
 try:
-    for i in range(80):
+    while True:
         tick(i2c_bus, OMRON_1, data)
         sleep(0.25)
 finally:
