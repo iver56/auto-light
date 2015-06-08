@@ -32,20 +32,20 @@ version = pi.get_pigpio_version()
 handle = pi.i2c_open(1, 0x0a)  # open Omron D6T device at address 0x0a on bus 1
 
 previous_celsius_data = []
-
+last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
 def turn_light_on():
-    print 'turning light on'
+    #print 'turning light on'
     GPIO.output(7, True)
 
 
 def turn_light_off():
-    print 'turning light off'
+    #print 'turning light off'
     GPIO.output(7, False)
 
 
 def tick(i2c_bus, OMRON_1, data):
-    global previous_celsius_data
+    global previous_celsius_data, last_stationary_human_detected
 
     i2c_bus.write_byte(OMRON_1, 0x4c)
     (bytes_read, data) = pi.i2c_read_device(handle, len(data))
@@ -58,7 +58,11 @@ def tick(i2c_bus, OMRON_1, data):
 
     stationary = is_stationary_human(celsius_data)
     moving = is_moving_human(celsius_data, previous_celsius_data)
+    
     if stationary and not moving:
+        last_stationary_human_detected = datetime.datetime.now()
+        turn_light_on()
+    elif last_stationary_human_detected >= datetime.datetime.now() - datetime.timedelta(seconds=2):
         turn_light_on()
     else:
         turn_light_off()
@@ -67,7 +71,7 @@ def tick(i2c_bus, OMRON_1, data):
 
 
 try:
-    for i in range(100):
+    for i in range(80):
         tick(i2c_bus, OMRON_1, data)
         sleep(0.25)
 finally:
