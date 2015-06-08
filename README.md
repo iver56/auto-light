@@ -37,3 +37,10 @@ GPIO.cleanup()
 
 ## Detect humans
 Next, you should decide how you're going to detect a human standing still in front of the mirror. I use an OMRON D6T MEMS Thermal Sensor for this. It actually senses the weak heat radiation coming from the human body, so it even works in the dark. Finally, write the sophisticated code that takes input from the sensor, processes it and wisely decides when the light should be on and when it should be off. I have some logic that decides when there's a human standing still in front of the mirror. In other words, the light does not turn on if somebody is moving, because somebody that just moves past the mirror does not need the mirror light. It would actually be just annoying and distracting if it would turn on when it should not. Also, in order to avoid blinking, I decide that I leave the light on for at least 2 seconds after the last time a human standing still in front of the mirror was detected.
+
+## Run script at startup
+Run `sudo crontab -e`
+
+Add a line like this:
+`@reboot python /home/pi/auto-light/read_thermal.py`
+
