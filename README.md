@@ -1,6 +1,9 @@
 # How-to
 
 ## What
+
+![Image](auto-light-demo.gif)
+
 I've got these led lights beside the mirror in my house, and I want them to turn on automatically when somebody is standing still in front of the mirror. The led strips use 12 V and the current is around 160 mA. Let's create a relay driver that can turn on and off the lights using a Raspberry Pi model B+. The lights will still use their original power source, which is a 12 V DC adapter.
 
 ## Circuit
