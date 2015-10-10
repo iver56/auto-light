@@ -14,10 +14,10 @@ import pigpio
 from helpers import *
 from time import sleep
 import datetime
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(7, GPIO.OUT)
+#GPIO.setmode(GPIO.BOARD)
+#GPIO.setup(7, GPIO.OUT)
 
 
 i2c_bus = smbus.SMBus(1)
@@ -29,19 +29,41 @@ data = [0] * OMRON_BUFFER_LENGTH  # initialize the temperature data list
 pi = pigpio.pi()  # use defaults
 version = pi.get_pigpio_version()
 # print 'PiGPIO version = '+str(version)
+pigpio_relay_pin = 4
+#pi.set_mode(pigpio_relay_pin, pigpio.OUTPUT)
+
 handle = pi.i2c_open(1, 0x0a)  # open Omron D6T device at address 0x0a on bus 1
 
 previous_celsius_data = []
 last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
+current_state = 1
+
 def turn_light_on():
     #print 'turning light on'
-    GPIO.output(7, True)
+    global current_state
+    if current_state == 1:
+        return
+    for i in range(0, 100):
+        x = i / 100.0
+        x = x ** 3
+        x = int(x * 255)
+        pi.set_PWM_dutycycle(pigpio_relay_pin, x)
+        sleep(0.01)
+    current_state = 1
 
 
 def turn_light_off():
     #print 'turning light off'
-    GPIO.output(7, False)
+    global current_state
+    if current_state == 0:
+        return
+    for i in reversed(range(100)):
+        x = i / 100.0
+        x = x ** 3
+        x = int(x * 255)
+        pi.set_PWM_dutycycle(pigpio_relay_pin, x)
+    current_state = 0
 
 
 def tick(i2c_bus, OMRON_1, data):
@@ -62,7 +84,7 @@ def tick(i2c_bus, OMRON_1, data):
     if stationary and not moving:
         last_stationary_human_detected = datetime.datetime.now()
         turn_light_on()
-    elif last_stationary_human_detected >= datetime.datetime.now() - datetime.timedelta(seconds=2):
+    elif last_stationary_human_detected >= datetime.datetime.now() - datetime.timedelta(seconds=3):
         turn_light_on()
     else:
         turn_light_off()
@@ -78,4 +100,4 @@ finally:
     print 'finally done'
     pi.i2c_close(handle)
     pi.stop()
-    GPIO.cleanup()
+    #GPIO.cleanup()
