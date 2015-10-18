@@ -63,6 +63,7 @@ def set_light_level(level):
     level /= 85.0
     level **= 3
     level = int(level * get_max_light_level())
+    level = min(255, max(0, level))
     pi.set_PWM_dutycycle(pigpio_relay_pin, level)
 
 
@@ -126,6 +127,8 @@ try:
             next_tick_time = datetime.datetime.now() + datetime.timedelta(seconds=0.25)
         else:
             update_light_level()
+except Exception, e:
+    print e
 finally:
     print 'finally done'
     pi.i2c_close(handle)
