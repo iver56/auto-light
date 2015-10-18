@@ -34,7 +34,8 @@ handle = pi.i2c_open(1, 0x0a)  # open Omron D6T device at address 0x0a on bus 1
 previous_celsius_data = []
 last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
-current_state = 1
+desired_light_level = 0
+current_light_level = 0
 
 
 def is_it_night():
@@ -53,34 +54,46 @@ def get_max_light_level():
     return 100 if dim_light else 255
 
 
+def set_light_level(level):
+    """
+    :param level: from 0 to 100
+    :return:
+    """
+    if level < 15:
+        level = 15
+    level /= 100.0
+    level **= 3
+    level = int(level * get_max_light_level())
+    pi.set_PWM_dutycycle(pigpio_relay_pin, level)
+
+
+def update_light_level():
+    global desired_light_level, current_light_level
+    diff = desired_light_level - current_light_level
+    if diff > 0:
+        current_light_level += 1
+    elif diff < 0:
+        current_light_level -= 1
+    else:
+        return
+    set_light_level(current_light_level)
+    sleep(0.008)
+
+
 def turn_light_on():
     #print 'turning light on'
-    global current_state
-    if current_state == 1:
+    global desired_light_level, current_light_level
+    if current_light_level == desired_light_level:
         return
-    max_light_level = get_max_light_level()
-    for i in range(16, 100):
-        x = i / 100.0
-        x **= 3
-        x = int(x * max_light_level)
-        pi.set_PWM_dutycycle(pigpio_relay_pin, x)
-        sleep(0.01)
-    current_state = 1
+    desired_light_level = get_max_light_level()
 
 
 def turn_light_off():
     #print 'turning light off'
-    global current_state
-    if current_state == 0:
+    global desired_light_level, current_light_level
+    if current_light_level == desired_light_level:
         return
-    max_light_level = get_max_light_level()
-    for i in reversed(range(15, 100)):
-        x = i / 100.0
-        x **= 3
-        x = int(x * max_light_level)
-        pi.set_PWM_dutycycle(pigpio_relay_pin, x)
-        sleep(0.01)
-    current_state = 0
+    desired_light_level = 0
 
 
 def tick(i2c_bus, OMRON_1, data):
@@ -110,9 +123,13 @@ def tick(i2c_bus, OMRON_1, data):
 
 
 try:
+    next_tick_time = datetime.datetime.now() - datetime.timedelta(seconds=1)
     while True:
-        tick(i2c_bus, OMRON_1, data)
-        sleep(0.25)
+        if datetime.datetime.now() >= next_tick_time:
+            tick(i2c_bus, OMRON_1, data)
+            next_tick_time = datetime.datetime.now() + datetime.timedelta(seconds=0.25)
+        else:
+            update_light_level()
 finally:
     print 'finally done'
     pi.i2c_close(handle)
