@@ -83,16 +83,12 @@ def update_light_level():
 def turn_light_on():
     print 'turning light on'
     global desired_light_level, current_light_level
-    if current_light_level == desired_light_level:
-        return
     desired_light_level = 100
 
 
 def turn_light_off():
     print 'turning light off'
     global desired_light_level, current_light_level
-    if current_light_level == desired_light_level:
-        return
     desired_light_level = 0
 
 
