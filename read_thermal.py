@@ -113,8 +113,11 @@ def tick(i2c_bus, OMRON_1, data):
     if stationary and not moving:
         time_stationary_detected = now
         turn_light_on()
-    elif moving and time_stationary_detected >= now - timedelta(seconds=10) and current_light_level:
-        turn_light_on()
+    elif moving and time_stationary_detected >= now - timedelta(seconds=10):
+        if current_light_level > 10:
+            turn_light_on()
+        else:
+            turn_light_off()
     elif time_stationary_detected >= now - timedelta(seconds=2):
         turn_light_on()
     else:
