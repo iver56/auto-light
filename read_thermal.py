@@ -35,7 +35,7 @@ previous_celsius_data = []
 last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
 desired_light_level = 0
-current_light_level = 0
+current_light_level = 0.0
 
 
 def is_it_night():
@@ -74,7 +74,7 @@ def update_light_level():
     if diff > 0:
         current_light_level += 1
     elif diff < 0:
-        current_light_level -= 0.5
+        current_light_level -= 0.25
     else:
         return
     set_light_level(current_light_level)
@@ -82,20 +82,19 @@ def update_light_level():
 
 
 def turn_light_on():
-    print 'turning light on'
+    #print 'turning light on'
     global desired_light_level, current_light_level
     desired_light_level = 100
 
 
 def turn_light_off():
-    print 'turning light off'
+    #print 'turning light off'
     global desired_light_level, current_light_level
     desired_light_level = 0
 
 
 def tick(i2c_bus, OMRON_1, data):
     global previous_celsius_data, last_stationary_human_detected
-    print 'tick'
 
     i2c_bus.write_byte(OMRON_1, 0x4c)
     (bytes_read, data) = pi.i2c_read_device(handle, len(data))
