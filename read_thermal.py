@@ -50,8 +50,9 @@ def is_it_night():
 
 
 def get_max_light_level():
-    dim_light = is_it_night()
-    return 100 if dim_light else 255
+    return 255
+    #dim_light = is_it_night()
+    #return 100 if dim_light else 255
 
 
 def set_light_level(level):
@@ -73,7 +74,7 @@ def update_light_level():
     if diff > 0:
         current_light_level += 1
     elif diff < 0:
-        current_light_level -= 1
+        current_light_level -= 0.5
     else:
         return
     set_light_level(current_light_level)
