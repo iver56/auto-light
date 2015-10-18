@@ -14,6 +14,7 @@ import pigpio
 from helpers import *
 from time import sleep
 import datetime
+from datetime import datetime, timedelta
 from astral import Astral
 from pytz import timezone
 
@@ -32,7 +33,7 @@ pigpio_relay_pin = 4
 handle = pi.i2c_open(1, 0x0a)  # open Omron D6T device at address 0x0a on bus 1
 
 previous_celsius_data = []
-time_stationary_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
+time_stationary_detected = datetime.now() - timedelta(minutes=10)
 
 desired_light_level = 0
 current_light_level = 0.0
@@ -45,7 +46,7 @@ def is_it_night():
     sun = city.sun(local=True)
     sunrise = sun['sunrise']
     dusk = sun['dusk']
-    now = datetime.datetime.now(timezone('CET'))
+    now = datetime.now(timezone('CET'))
     return now < sunrise or now > dusk
 
 
@@ -94,7 +95,7 @@ def turn_light_off():
 
 
 def tick(i2c_bus, OMRON_1, data):
-    global previous_celsius_data, time_stationary_detected
+    global previous_celsius_data, time_stationary_detected, current_light_level
 
     i2c_bus.write_byte(OMRON_1, 0x4c)
     (bytes_read, data) = pi.i2c_read_device(handle, len(data))
@@ -107,14 +108,14 @@ def tick(i2c_bus, OMRON_1, data):
 
     stationary = is_stationary_human(celsius_data)
     moving = is_moving_human(celsius_data, previous_celsius_data)
-    now = datetime.datetime.now()
+    now = datetime.now()
     
     if stationary and not moving:
         time_stationary_detected = now
         turn_light_on()
-    elif moving and time_stationary_detected >= now - datetime.timedelta(seconds=10):
+    elif moving and time_stationary_detected >= now - timedelta(seconds=10) and current_light_level:
         turn_light_on()
-    elif time_stationary_detected >= now - datetime.timedelta(seconds=3):
+    elif time_stationary_detected >= now - timedelta(seconds=2):
         turn_light_on()
     else:
         turn_light_off()
@@ -123,11 +124,11 @@ def tick(i2c_bus, OMRON_1, data):
 
 
 try:
-    next_tick_time = datetime.datetime.now() - datetime.timedelta(seconds=1)
+    next_tick_time = datetime.now() - timedelta(seconds=1)
     while True:
-        if next_tick_time < datetime.datetime.now():
+        if next_tick_time < datetime.now():
             tick(i2c_bus, OMRON_1, data)
-            next_tick_time = datetime.datetime.now() + datetime.timedelta(seconds=0.25)
+            next_tick_time = datetime.now() + timedelta(seconds=0.25)
         else:
             update_light_level()
 except Exception, e:
