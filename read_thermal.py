@@ -14,10 +14,8 @@ import pigpio
 from helpers import *
 from time import sleep
 import datetime
-#import RPi.GPIO as GPIO
-
-#GPIO.setmode(GPIO.BOARD)
-#GPIO.setup(7, GPIO.OUT)
+from astral import Astral
+from pytz import timezone
 
 
 i2c_bus = smbus.SMBus(1)
@@ -39,15 +37,30 @@ last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(mi
 
 current_state = 1
 
+def is_it_night():
+    a = Astral()
+    city_name = 'Oslo'
+    city = a[city_name]
+    sun = city.sun(local=True)
+    sunrise = sun['sunrise']
+    dusk = sun['dusk']
+    now = datetime.datetime.now(timezone('CET'))
+    return (now < sunrise or now > dusk)
+
+def get_max_light_level():
+    dim_light = is_it_night()
+    return 100 if dim_light else 255
+
 def turn_light_on():
     #print 'turning light on'
     global current_state
     if current_state == 1:
         return
+    max_light_level = get_max_light_level()
     for i in range(0, 100):
         x = i / 100.0
         x = x ** 3
-        x = int(x * 255)
+        x = int(x * max_light_level)
         pi.set_PWM_dutycycle(pigpio_relay_pin, x)
         sleep(0.01)
     current_state = 1
@@ -58,11 +71,13 @@ def turn_light_off():
     global current_state
     if current_state == 0:
         return
+    max_light_level = get_max_light_level()
     for i in reversed(range(100)):
         x = i / 100.0
         x = x ** 3
-        x = int(x * 255)
+        x = int(x * max_light_level)
         pi.set_PWM_dutycycle(pigpio_relay_pin, x)
+        sleep(0.01)
     current_state = 0
 
 
