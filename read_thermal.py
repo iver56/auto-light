@@ -81,15 +81,15 @@ def update_light_level():
 
 
 def turn_light_on():
-    #print 'turning light on'
+    print 'turning light on'
     global desired_light_level, current_light_level
     if current_light_level == desired_light_level:
         return
-    desired_light_level = get_max_light_level()
+    desired_light_level = 100
 
 
 def turn_light_off():
-    #print 'turning light off'
+    print 'turning light off'
     global desired_light_level, current_light_level
     if current_light_level == desired_light_level:
         return
@@ -98,6 +98,7 @@ def turn_light_off():
 
 def tick(i2c_bus, OMRON_1, data):
     global previous_celsius_data, last_stationary_human_detected
+    print 'tick'
 
     i2c_bus.write_byte(OMRON_1, 0x4c)
     (bytes_read, data) = pi.i2c_read_device(handle, len(data))
