@@ -28,7 +28,6 @@ pi = pigpio.pi()  # use defaults
 version = pi.get_pigpio_version()
 # print 'PiGPIO version = '+str(version)
 pigpio_relay_pin = 4
-#pi.set_mode(pigpio_relay_pin, pigpio.OUTPUT)
 
 handle = pi.i2c_open(1, 0x0a)  # open Omron D6T device at address 0x0a on bus 1
 
@@ -36,6 +35,7 @@ previous_celsius_data = []
 last_stationary_human_detected = datetime.datetime.now() - datetime.timedelta(minutes=10)
 
 current_state = 1
+
 
 def is_it_night():
     a = Astral()
@@ -45,11 +45,13 @@ def is_it_night():
     sunrise = sun['sunrise']
     dusk = sun['dusk']
     now = datetime.datetime.now(timezone('CET'))
-    return (now < sunrise or now > dusk)
+    return now < sunrise or now > dusk
+
 
 def get_max_light_level():
     dim_light = is_it_night()
     return 100 if dim_light else 255
+
 
 def turn_light_on():
     #print 'turning light on'
@@ -57,9 +59,9 @@ def turn_light_on():
     if current_state == 1:
         return
     max_light_level = get_max_light_level()
-    for i in range(0, 100):
+    for i in range(16, 100):
         x = i / 100.0
-        x = x ** 3
+        x **= 3
         x = int(x * max_light_level)
         pi.set_PWM_dutycycle(pigpio_relay_pin, x)
         sleep(0.01)
@@ -72,9 +74,9 @@ def turn_light_off():
     if current_state == 0:
         return
     max_light_level = get_max_light_level()
-    for i in reversed(range(100)):
+    for i in reversed(range(15, 100)):
         x = i / 100.0
-        x = x ** 3
+        x **= 3
         x = int(x * max_light_level)
         pi.set_PWM_dutycycle(pigpio_relay_pin, x)
         sleep(0.01)
@@ -115,4 +117,3 @@ finally:
     print 'finally done'
     pi.i2c_close(handle)
     pi.stop()
-    #GPIO.cleanup()
