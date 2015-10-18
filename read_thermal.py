@@ -59,9 +59,8 @@ def set_light_level(level):
     :param level: from 0 to 100
     :return:
     """
-    if level < 15:
-        level = 15
-    level /= 100.0
+    level -= 15
+    level /= 85.0
     level **= 3
     level = int(level * get_max_light_level())
     pi.set_PWM_dutycycle(pigpio_relay_pin, level)
@@ -77,7 +76,7 @@ def update_light_level():
     else:
         return
     set_light_level(current_light_level)
-    sleep(0.008)
+    sleep(0.01)
 
 
 def turn_light_on():
@@ -122,7 +121,7 @@ def tick(i2c_bus, OMRON_1, data):
 try:
     next_tick_time = datetime.datetime.now() - datetime.timedelta(seconds=1)
     while True:
-        if datetime.datetime.now() >= next_tick_time:
+        if next_tick_time < datetime.datetime.now():
             tick(i2c_bus, OMRON_1, data)
             next_tick_time = datetime.datetime.now() + datetime.timedelta(seconds=0.25)
         else:
