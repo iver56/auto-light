@@ -112,14 +112,14 @@ class AutoLight(object):
             temperature_celsius = convert_two_bytes_to_celsius(first_byte, second_byte)
             celsius_data.append(temperature_celsius)
 
-        stationary = is_stationary_human(celsius_data)
+        warm_enough, should_activate = is_human(celsius_data)
         moving = is_moving_human(celsius_data, self.previous_celsius_data)
         now = datetime.now()
 
-        if stationary and not moving:
+        if warm_enough and should_activate and not moving:
             self.time_stationary_detected = now
             self.turn_light_on()
-        elif stationary and self.time_stationary_detected >= now - timedelta(seconds=10):
+        elif warm_enough and self.time_stationary_detected >= now - timedelta(seconds=10):
             if self.current_light_level > 5:
                 self.turn_light_on()
             else:
