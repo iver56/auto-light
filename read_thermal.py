@@ -117,10 +117,13 @@ class AutoLight(object):
         now = datetime.now()
 
         if warm_enough and should_activate and not moving:
+            # activate light
             self.time_stationary_detected = now
             self.turn_light_on()
         elif warm_enough and self.time_stationary_detected >= now - timedelta(seconds=10):
             if self.current_light_level > 5:
+                if not moving:
+                    self.time_stationary_detected = now  # stay alive
                 self.turn_light_on()
             else:
                 self.turn_light_off()
