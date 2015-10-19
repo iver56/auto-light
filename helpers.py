@@ -56,6 +56,7 @@ def is_human(celsius_data):
                 x, y = convert_1d_to_2d(i)
                 if is_in_the_middle(x, y):
                     should_activate = True
+                    break
     # print 'is human detected:', warm_enough
     return warm_enough, should_activate
 
