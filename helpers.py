@@ -1,6 +1,7 @@
 from operator import sub
 from datetime import timedelta
 
+
 def convert_two_bytes_to_celsius(first_byte, second_byte):
     return (first_byte + 256 * second_byte) * 0.1
 
