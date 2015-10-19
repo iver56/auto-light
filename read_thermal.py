@@ -74,11 +74,16 @@ class AutoLight(object):
         :param level: from 0 to 100
         :return:
         """
-        level -= 15
-        level /= 85.0
-        level **= 3
-        level = int(level * self.get_max_light_level())
-        level = min(255, max(0, level))
+        if level == 0:
+            level = 0
+        elif level < 7:
+            level = (level + 1) / 2
+        else:
+            level += 25
+            level /= 125.0
+            level **= 3
+            level *= 255
+        level = int(min(255, max(0, level)))
         self.pi.set_PWM_dutycycle(self.pigpio_relay_pin, level)
 
     def update_light_level(self):
