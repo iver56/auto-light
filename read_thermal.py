@@ -74,9 +74,7 @@ class AutoLight(object):
         :param level: from 0 to 100
         :return:
         """
-        if level == 0:
-            level = 0
-        elif level < 7:
+        if level < 7:
             level = (level + 1) / 2
         else:
             level += 25
