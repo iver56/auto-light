@@ -18,26 +18,6 @@ Firstly, get a BC618 transistor, which can handle up to 500 mA of continous curr
 
 You might want to use a [breadboard](http://en.wikipedia.org/wiki/Breadboard) while testing, before soldering stuff.
 
-## Coding
-Now, on the raspberry pi, install python-dev and then [RPi.GPIO](https://pypi.python.org/pypi/RPi.GPIO), and you're ready to start coding. Here's some python code for a basic blinking light:
-
-```python
-import RPi.GPIO as GPIO
-from time import sleep
-
-GPIO.setmode(GPIO.BOARD)
-
-GPIO.setup(7, GPIO.OUT)
-
-for i in range(5):
-    GPIO.output(7, False)
-    sleep(2)
-    GPIO.output(7, True)
-    sleep(2)
-
-GPIO.cleanup()
-```
-
 ## Detect humans
 Next, you should decide how you're going to detect a human standing still in front of the mirror. I use an OMRON D6T MEMS Thermal Sensor for this. It actually senses the weak heat radiation coming from the human body, so it even works in the dark. Finally, write the sophisticated code that takes input from the sensor, processes it and wisely decides when the light should be on and when it should be off. I have some logic that decides when there's a human standing still in front of the mirror. In other words, the light does not turn on if somebody is moving, because somebody that just moves past the mirror does not need the mirror light. It would actually be just annoying and distracting if it would turn on when it should not. Also, in order to avoid blinking, I decide that I leave the light on for at least 2 seconds after the last time a human standing still in front of the mirror was detected.
 
