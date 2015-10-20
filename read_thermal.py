@@ -44,6 +44,7 @@ class AutoLight(object):
                     self.next_tick_time = datetime.now() + timedelta(seconds=0.25)
                 else:
                     self.update_light_level()
+                    # TODO: if noop, let the CPU sleep until next tick
         except Exception, e:
             print e
         finally:
@@ -74,11 +75,9 @@ class AutoLight(object):
         :param level: from 0 to 100
         :return:
         """
-        if level < 7:
-            level = (level + 1) / 2
-        else:
-            level += 25
-            level /= 125.0
+        if level >= 15:
+            level += 40
+            level /= 140.0
             level **= 3
             level *= 255
         level = int(min(255, max(0, level)))
